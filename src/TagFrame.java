@@ -8,10 +8,8 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Scanner;
+import java.util.*;
+import java.util.jar.Attributes;
 import java.util.stream.Stream;
 
 public class TagFrame extends JFrame {
@@ -39,9 +37,12 @@ public class TagFrame extends JFrame {
     boolean FileLoaded = false;
     Path FilePath;
     File OriginalFile;
+    File StopWordsFile;
+    ArrayList<String> StopWords;
     Scanner in;
     Map<String, Integer> hashes;
     String[] words;
+    boolean ignore = false;
 
 
     public TagFrame() throws HeadlessException {
@@ -97,22 +98,38 @@ public class TagFrame extends JFrame {
                 if (chooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
                     OriginalFile = chooser.getSelectedFile();
                     FilePath = OriginalFile.toPath();
+                    StopWordsFile = new File("English Stop Words.txt");
                     FileLoaded = true;
 
                     FileName.setText(OriginalFile.getName());
 
-                    Scanner in = new Scanner(OriginalFile);
+                    Scanner StopIn = new Scanner(StopWordsFile);
+                    StopWords = new ArrayList<>();
+                    while(StopIn.hasNextLine()){
+                        String line = StopIn.nextLine();
+                        StopWords.add(line.toLowerCase(Locale.ROOT));
+                    }
+
+                    in = new Scanner(OriginalFile);
                     hashes = new HashMap<String, Integer>();
 
                     while (in.hasNextLine()) {
                         String line = in.nextLine();
-                        words = line.split(" ");
+                        words = line.toLowerCase(Locale.ROOT).split(" ");
                         for (String word : words) {
-                            if (!hashes.containsKey(word)) {
-                                hashes.put(word, 1);
+                            ignore = false;
+                            for(String stop : StopWords){
+                                if(word.equals(stop)){
+                                    ignore = true;
+                                    break;
+                                }
                             }
-                            else {
-                                hashes.put(word, hashes.get(word) + 1);
+                            if(!ignore) {
+                                if (!hashes.containsKey(word)) {
+                                    hashes.put(word, 1);
+                                } else {
+                                    hashes.put(word, hashes.get(word) + 1);
+                                }
                             }
                         }
                     }
