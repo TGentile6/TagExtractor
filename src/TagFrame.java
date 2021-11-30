@@ -2,15 +2,15 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
+import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
 import java.util.jar.Attributes;
 import java.util.stream.Stream;
+
+import static java.nio.file.StandardOpenOption.CREATE;
 
 public class TagFrame extends JFrame {
     //Main Panel
@@ -30,6 +30,7 @@ public class TagFrame extends JFrame {
     JPanel BtnPanel;
     JButton QuitBtn;
     JButton LoadBtn;
+    JButton SaveBtn;
 
 
     //ActionListeners
@@ -78,10 +79,13 @@ public class TagFrame extends JFrame {
     private void CreateBtnPanel() {
         BtnPanel = new JPanel();
         QuitBtn = new JButton("Quit");
-        LoadBtn= new JButton("Load File");
+        LoadBtn = new JButton("Load File");
+        SaveBtn = new JButton("Save Tags to File");
         LoadBtn.addActionListener(new LoadListener());
+        SaveBtn.addActionListener(new SaveListener());
         QuitBtn.addActionListener((ActionEvent ae) -> {System.exit(0);});
         BtnPanel.add(LoadBtn);
+        BtnPanel.add(SaveBtn);
         BtnPanel.add(QuitBtn);
     }
 
@@ -142,8 +146,29 @@ public class TagFrame extends JFrame {
                 System.out.println("File not found!!!");
                 e.printStackTrace();
             }
-            catch(IOException e) {
-                e.printStackTrace();
+        }
+    }
+    public class SaveListener implements ActionListener {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            if(FileLoaded){
+                File workingDirectory = new File(System.getProperty("user.dir"));
+                Path file = Paths.get(workingDirectory.getPath() + "\\Tags.txt");
+
+                try
+                {
+                    OutputStream out = new BufferedOutputStream(Files.newOutputStream(file, CREATE));
+                    BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(out));
+                    TagsArea.write(writer);
+                    writer.close();
+                    JOptionPane.showMessageDialog(null, "File written!");
+                }
+                catch (IOException ioException) {
+                    ioException.printStackTrace();
+                }
+            }
+            else{
+                JOptionPane.showMessageDialog(null, "There is no file loaded!");
             }
         }
     }

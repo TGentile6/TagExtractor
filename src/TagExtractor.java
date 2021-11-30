@@ -8,8 +8,8 @@ public class TagExtractor {
         double dWidth = Toolkit.getDefaultToolkit().getScreenSize().getWidth();
 
         //create and int value for 3/4ths the width and height of the screen resolution
-        int height = ((int)(dHeight * .75));
-        int width = ((int)(dWidth * .75));
+        int height = ((int)(dHeight * .5));
+        int width = ((int)(dWidth * .5));
 
         //create a JFrame using FortuneTellerFrame
         JFrame frame = new TagFrame();
